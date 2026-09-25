@@ -1,0 +1,13 @@
+{
+  "name": "sukima",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Japanese quiz breaks Chrome extension (no build step; this file only runs tests).",
+  "scripts": {
+    "test": "node --test tests/",
+    "fonts": "node tools/subset-fonts.js"
+  },
+  "devDependencies": {
+    "subset-font": "^2.7.0"
+  }
+}

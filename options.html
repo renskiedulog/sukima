@@ -1,0 +1,1114 @@
+<!doctype html>
+<html lang="en" data-theme="system">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sukima settings</title>
+    <link rel="stylesheet" href="shared/fonts.css" />
+    <link rel="stylesheet" href="shared/theme.css" />
+    <style>
+      body {
+        font-size: 15px;
+      }
+
+      button,
+      input {
+        font: inherit;
+        color: inherit;
+      }
+
+      /* ---------- shell ---------- */
+      .app {
+        display: grid;
+        grid-template-columns: 220px minmax(0, 1fr);
+        min-height: 100vh;
+        /* sidebar tone runs the full page height, not just the sticky 100vh box */
+        background: linear-gradient(to right, var(--side) 219px, var(--line) 219px 220px, var(--bg) 220px);
+      }
+
+      .side {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        gap: 28px;
+        padding: 28px 16px 20px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 8px;
+        font: 400 18px/1.2 var(--font-head);
+      }
+
+      /* hanko-style seal */
+      .seal {
+        display: grid;
+        place-items: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 5px;
+        background: var(--seal);
+        color: #fff;
+        font: 600 19px/1 var(--font-ja);
+      }
+
+      .nav {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .nav a {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 10px;
+        border-radius: 6px;
+        color: var(--muted);
+        text-decoration: none;
+      }
+
+      .nav a:hover {
+        color: var(--fg);
+        background: color-mix(in srgb, var(--fg) 6%, transparent);
+      }
+
+      .nav a[aria-current="page"] {
+        color: var(--fg);
+        background: var(--surface);
+        font-weight: 600;
+        box-shadow: inset 0 0 0 1px var(--line);
+      }
+
+      .nav .nav-sep {
+        height: 1px;
+        margin: 8px 10px;
+        background: var(--line);
+      }
+
+      .status {
+        margin-top: auto;
+        padding: 12px 10px 0;
+        border-top: 1px solid var(--line);
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      .status-count {
+        display: block;
+        font-size: 22px;
+        font-weight: 650;
+        color: var(--fg);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .status.warn .status-count {
+        color: var(--seal);
+      }
+
+      .saved {
+        display: block;
+        margin-top: 6px;
+        min-height: 1.5em;
+      }
+
+      .main {
+        padding: 40px 48px 80px;
+      }
+
+      .panel {
+        max-width: 680px;
+      }
+
+      .panel > h1,
+      .stats-head h1 {
+        margin: 0;
+        font: 400 30px/1.2 var(--font-head);
+      }
+
+      .panel > .lede {
+        margin: 4px 0 32px;
+        color: var(--muted);
+        max-width: 60ch;
+      }
+
+      .block {
+        padding: 24px 0;
+        border-top: 1px solid var(--line);
+      }
+
+      .block:first-of-type {
+        border-top: 0;
+        padding-top: 0;
+      }
+
+      .block-head {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+
+      .block-head > div {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .block-head h2 {
+        margin: 0;
+        font-size: 17px;
+        font-weight: 650;
+      }
+
+      .block-head p {
+        margin: 2px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      /* ---------- controls ---------- */
+      .switch {
+        position: relative;
+        flex: none;
+        width: 40px;
+        height: 24px;
+        margin-top: 2px;
+        padding: 0;
+        border: 0;
+        border-radius: 999px;
+        background: var(--line);
+        cursor: pointer;
+        transition: background-color 0.15s;
+      }
+
+      .switch::after {
+        content: "";
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--surface);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+        transition: transform 0.15s;
+      }
+
+      .switch[aria-checked="true"] {
+        background: var(--accent);
+      }
+
+      .switch[aria-checked="true"]::after {
+        transform: translateX(16px);
+      }
+
+      .field {
+        height: 36px;
+        padding: 0 10px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--surface);
+      }
+
+      .field:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-soft);
+      }
+
+      .seg,
+      .days {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .seg button,
+      .days button {
+        min-width: 48px;
+        height: 36px;
+        padding: 0 12px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--surface);
+        font-size: 14px;
+        font-variant-numeric: tabular-nums;
+        cursor: pointer;
+      }
+
+      .seg button:hover,
+      .days button:hover {
+        border-color: var(--muted);
+      }
+
+      .seg button[aria-pressed="true"],
+      .days button[aria-pressed="true"] {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: var(--accent-fg);
+        font-weight: 600;
+      }
+
+      .days {
+        margin-bottom: 14px;
+      }
+
+      .inline {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      #custom-min {
+        width: 76px;
+      }
+
+      /* ---------- study tiles ---------- */
+      .course[data-off="true"] .tiles-area,
+      .quiet-body[data-off="true"] {
+        opacity: 0.4;
+        pointer-events: none;
+      }
+
+      .tile-row {
+        display: grid;
+        grid-template-columns: 76px 1fr;
+        gap: 12px;
+        align-items: start;
+      }
+
+      .tile-row + .tile-row {
+        margin-top: 12px;
+      }
+
+      .row-label {
+        padding-top: 14px;
+        font: 500 15px var(--font-ja);
+        color: var(--muted);
+      }
+
+      .tiles {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+        gap: 8px;
+      }
+
+      .tile {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+        padding: 10px 12px 9px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        text-align: left;
+        cursor: pointer;
+        transition: background-color 0.12s, border-color 0.12s, color 0.12s;
+      }
+
+      .tile:hover {
+        border-color: var(--muted);
+      }
+
+      .tile:active {
+        transform: translateY(1px);
+      }
+
+      .glyph {
+        font: 500 30px/1.1 var(--font-ja);
+        letter-spacing: 0.02em;
+        white-space: nowrap;
+      }
+
+      .tile-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 6px;
+        width: 100%;
+        font-size: 13px;
+      }
+
+      .tile-name {
+        font-weight: 600;
+      }
+
+      .tile-count {
+        color: var(--muted);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .tile[aria-pressed="true"] {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: var(--accent-fg);
+      }
+
+      .tile[aria-pressed="true"] .tile-count {
+        color: color-mix(in srgb, var(--accent-fg) 75%, transparent);
+      }
+
+      /* ---------- rows (question styles) ---------- */
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 12px 0;
+        border-top: 1px solid var(--line);
+      }
+
+      .row:first-child {
+        border-top: 0;
+        padding-top: 0;
+      }
+
+      .row > div {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .row strong {
+        display: block;
+        font-weight: 600;
+      }
+
+      .row span {
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .row .switch {
+        margin-top: 0;
+      }
+
+      .summary {
+        margin: 16px 0 0;
+        padding: 10px 14px;
+        border-left: 3px solid var(--accent);
+        border-radius: 0 6px 6px 0;
+        background: var(--surface);
+        font-size: 14px;
+      }
+
+      /* ---------- sites ---------- */
+      .add-site {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+
+      .add-site .field {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .add-site .btn {
+        height: 36px;
+        font-size: 14px;
+      }
+
+      .form-error {
+        margin: -8px 0 12px;
+        color: var(--seal);
+        font-size: 13px;
+      }
+
+      .site-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        overflow: hidden;
+      }
+
+      .site-list li {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 8px 10px 14px;
+        border-top: 1px solid var(--line);
+      }
+
+      .site-list li:first-child {
+        border-top: 0;
+      }
+
+      .site-host {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .site-sub {
+        color: var(--muted);
+        font-size: 13px;
+        white-space: nowrap;
+      }
+
+      .icon-btn {
+        display: grid;
+        place-items: center;
+        width: 30px;
+        height: 30px;
+        padding: 0;
+        border: 0;
+        border-radius: 6px;
+        background: transparent;
+        color: var(--muted);
+        cursor: pointer;
+      }
+
+      .icon-btn:hover {
+        background: var(--seal-soft);
+        color: var(--seal);
+      }
+
+      .site-list .empty {
+        padding: 18px 14px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      /* ---------- appearance ---------- */
+      .themes {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+        gap: 12px;
+      }
+
+      .theme-opt {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        text-align: left;
+        cursor: pointer;
+      }
+
+      .theme-opt[aria-checked="true"] {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 1px var(--accent);
+      }
+
+      .theme-opt strong {
+        padding: 0 2px;
+        font-weight: 600;
+        font-size: 14px;
+      }
+
+      /* mini quiz-card preview, fixed colours so each option shows its own theme */
+      .pv {
+        height: 92px;
+        border-radius: 6px;
+        overflow: hidden;
+        display: grid;
+        place-items: center;
+      }
+
+      .pv-card {
+        width: 70%;
+        padding: 8px;
+        border-radius: 6px;
+        text-align: center;
+      }
+
+      .pv-glyph {
+        font: 500 24px/1.1 var(--font-ja);
+      }
+
+      .pv-bars {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3px;
+        margin-top: 6px;
+      }
+
+      .pv-bars i {
+        height: 7px;
+        border-radius: 2px;
+      }
+
+      .pv-light { background: #cfd5d0; }
+      .pv-light .pv-card { background: #fafbf9; color: #1f2328; }
+      .pv-light .pv-bars i { background: #d3d9d4; }
+      .pv-light .pv-bars i:first-child { background: #24406e; }
+      .pv-dark { background: #0f1113; }
+      .pv-dark .pv-card { background: #22262b; color: #e6e9e4; }
+      .pv-dark .pv-bars i { background: #343a40; }
+      .pv-dark .pv-bars i:first-child { background: #8fa8d8; }
+      .pv-system { grid-template-columns: 1fr 1fr; place-items: stretch; }
+      .pv-system > div { display: grid; place-items: center; overflow: hidden; }
+      .pv-system .pv-card { width: 84%; }
+
+      /* ---------- data ---------- */
+      .data-row {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px 0;
+        border-top: 1px solid var(--line);
+      }
+
+      .data-row:first-of-type {
+        border-top: 0;
+        padding-top: 0;
+      }
+
+      .data-row > div {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .data-row strong {
+        display: block;
+        font-weight: 600;
+      }
+
+      .data-row span {
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .data-row .btn {
+        font-size: 14px;
+      }
+
+      .data-row.danger {
+        margin-top: 12px;
+        padding: 16px;
+        border: 1px solid color-mix(in srgb, var(--seal) 35%, var(--line));
+        border-radius: 8px;
+        background: color-mix(in srgb, var(--seal-soft) 50%, transparent);
+      }
+
+      .data-msg {
+        min-height: 1.5em;
+        margin-top: 12px;
+        font-size: 14px;
+        color: var(--muted);
+      }
+
+      .data-msg.bad {
+        color: var(--seal);
+      }
+
+      /* ---------- stats ---------- */
+      .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        gap: 12px;
+        margin-bottom: 32px;
+      }
+
+      .stat {
+        padding: 14px 16px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+      }
+
+      .stat-label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      .stat-value {
+        margin-top: 2px;
+        font-size: 26px;
+        font-weight: 800;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .stat-sub {
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      #panel-stats .block:first-of-type {
+        padding-top: 24px;
+        border-top: 1px solid var(--line);
+      }
+
+      .bars {
+        display: flex;
+        align-items: flex-end;
+        gap: 3px;
+        height: 120px;
+      }
+
+      .bar {
+        flex: 1;
+        min-width: 0;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        border-radius: 3px;
+        background: var(--chip);
+      }
+
+      .bar-fill {
+        border-radius: 3px;
+        background: var(--accent);
+      }
+
+      .bar.today {
+        outline: 1px solid var(--muted);
+        outline-offset: 1px;
+      }
+
+      .axis {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 6px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .course-row {
+        display: grid;
+        grid-template-columns: 90px 1fr 130px;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 10px;
+      }
+
+      .course-row:last-child {
+        margin-bottom: 0;
+      }
+
+      .meter {
+        height: 8px;
+        border-radius: 999px;
+        background: var(--chip);
+        overflow: hidden;
+      }
+
+      .meter span {
+        display: block;
+        height: 100%;
+        border-radius: 999px;
+        background: var(--right);
+      }
+
+      .num {
+        text-align: right;
+        font-size: 14px;
+        color: var(--muted);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+      }
+
+      .weak-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+      }
+
+      .weak-table th,
+      .weak-table td {
+        padding: 8px 6px;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+      }
+
+      .weak-table th {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--muted);
+      }
+
+      .weak-table .n {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .weak-table tr:last-child td {
+        border-bottom: 0;
+      }
+
+      .weak-item {
+        font-size: 17px;
+      }
+
+      .stats-empty {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      /* ---------- share card ---------- */
+      .stats-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+
+      .share-dialog {
+        width: min(420px, calc(100vw - 32px));
+        max-height: calc(100vh - 32px);
+        padding: 20px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--surface);
+        color: var(--fg);
+      }
+
+      .share-dialog::backdrop {
+        background: rgb(0 0 0 / 0.45);
+      }
+
+      .share-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 14px;
+      }
+
+      .share-top h2 {
+        margin: 0;
+        font: 400 20px/1.2 var(--font-head);
+      }
+
+      .icon-btn {
+        display: grid;
+        place-items: center;
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        border: 0;
+        border-radius: 8px;
+        background: transparent;
+        color: var(--muted);
+        cursor: pointer;
+      }
+
+      .icon-btn:hover {
+        background: var(--chip);
+        color: var(--fg);
+      }
+
+      .share-canvas {
+        display: block;
+        width: 100%;
+        height: auto;
+        aspect-ratio: 1080 / 1350;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--bg);
+      }
+
+      .share-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 14px;
+      }
+
+      .share-actions .btn {
+        flex: 1;
+      }
+
+      .share-msg {
+        min-height: 1.5em;
+        margin: 8px 0 0;
+        font-size: 13px;
+        color: var(--right);
+      }
+
+      .share-msg.bad {
+        color: var(--seal);
+      }
+
+      .share-note {
+        margin: 2px 0 0;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      /* ---------- responsive ---------- */
+      @media (max-width: 760px) {
+        .app {
+          grid-template-columns: 1fr;
+          background: var(--bg);
+        }
+
+        .side {
+          z-index: 5;
+          height: auto;
+          flex-direction: row;
+          align-items: center;
+          gap: 12px;
+          padding: 10px 16px;
+          background: var(--side);
+          border-bottom: 1px solid var(--line);
+          overflow-x: auto;
+          scrollbar-width: none; /* still swipeable, no scrollbar under the nav */
+        }
+
+        .brand span:last-child,
+        .nav .icon,
+        .nav .nav-sep,
+        .status {
+          display: none;
+        }
+
+        .nav {
+          flex-direction: row;
+        }
+
+        .nav a {
+          white-space: nowrap;
+        }
+
+        .main {
+          padding: 24px 16px 64px;
+        }
+
+        .tile-row {
+          grid-template-columns: 1fr;
+          gap: 6px;
+        }
+
+        .row-label {
+          padding-top: 0;
+        }
+
+        .course-row {
+          grid-template-columns: 70px 1fr;
+        }
+
+        .course-row .num {
+          grid-column: 1 / -1;
+          text-align: left;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .switch,
+        .switch::after,
+        .tile {
+          transition: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <aside class="side">
+        <div class="brand"><span class="seal" lang="ja">隙</span><span>Sukima</span></div>
+
+        <nav class="nav" aria-label="Settings sections">
+          <a href="#study" data-panel="study"><span data-icon="book"></span>Study</a>
+          <a href="#schedule" data-panel="schedule"><span data-icon="clock"></span>Schedule</a>
+          <a href="#sites" data-panel="sites"><span data-icon="ban"></span>Sites</a>
+          <a href="#appearance" data-panel="appearance"><span data-icon="sun"></span>Appearance</a>
+          <a href="#data" data-panel="data"><span data-icon="database"></span>Your data</a>
+          <span class="nav-sep" role="presentation"></span>
+          <a href="#stats" data-panel="stats"><span data-icon="chart"></span>Stats</a>
+        </nav>
+
+        <div class="status" id="status" aria-live="polite">
+          <span class="status-count" id="status-count">0</span>
+          <span id="status-text">items in rotation</span>
+          <span class="saved" id="saved">Changes save automatically</span>
+        </div>
+      </aside>
+
+      <main class="main">
+        <section class="panel" id="panel-study">
+          <h1>Study</h1>
+          <p class="lede">Pick what shows up in your quiz breaks. Missed items come back more often.</p>
+          <div id="courses"></div>
+          <div class="block">
+            <div class="block-head">
+              <div>
+                <h2>Question styles</h2>
+                <p>Each quiz picks one of the styles you leave on.</p>
+              </div>
+            </div>
+            <div id="styles"></div>
+          </div>
+        </section>
+
+        <section class="panel" id="panel-schedule" hidden>
+          <h1>Schedule</h1>
+          <p class="lede">A quiz appears when the timer runs out and you're on a regular web page.</p>
+
+          <div class="block">
+            <div class="block-head">
+              <div>
+                <h2>Quiz every</h2>
+                <p>Minutes between quizzes.</p>
+              </div>
+            </div>
+            <div class="inline">
+              <div class="seg" id="interval" role="group" aria-label="Minutes between quizzes"></div>
+              <label class="inline" style="gap: 8px">
+                <span class="muted">or</span>
+                <input class="field" id="custom-min" type="number" min="1" step="1" placeholder="min" aria-label="Custom minutes" />
+              </label>
+            </div>
+          </div>
+
+          <div class="block">
+            <div class="block-head">
+              <div>
+                <h2>Quiet hours</h2>
+                <p>No quizzes during these times.</p>
+              </div>
+              <button class="switch" id="quiet-switch" role="switch" aria-checked="false" aria-label="Quiet hours"></button>
+            </div>
+            <div class="quiet-body" id="quiet-body">
+              <div class="days" id="days" role="group" aria-label="Days"></div>
+              <div class="inline">
+                <label class="inline" style="gap: 8px">From <input class="field" id="q-start" type="time" /></label>
+                <label class="inline" style="gap: 8px">to <input class="field" id="q-end" type="time" /></label>
+              </div>
+              <p class="summary" id="quiet-summary"></p>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" id="panel-sites" hidden>
+          <h1>Sites</h1>
+          <p class="lede">Quizzes never appear on these sites. Blocking a site also blocks its subdomains.</p>
+          <form class="add-site" id="add-site">
+            <input class="field" id="site-input" placeholder="example.com" aria-label="Site to block" autocomplete="off" spellcheck="false" />
+            <button class="btn btn-primary" type="submit"><span data-icon="plus"></span>Block site</button>
+          </form>
+          <p class="form-error" id="site-error" role="alert" hidden></p>
+          <ul class="site-list" id="site-list"></ul>
+        </section>
+
+        <section class="panel" id="panel-appearance" hidden>
+          <h1>Appearance</h1>
+          <p class="lede">Applies to quizzes, this page and the toolbar popup.</p>
+          <div class="themes" role="radiogroup" aria-label="Theme">
+            <button class="theme-opt" role="radio" aria-checked="false" data-theme-value="system">
+              <div class="pv pv-system" aria-hidden="true">
+                <div class="pv-light"><div class="pv-card"><div class="pv-glyph">し</div><div class="pv-bars"><i></i><i></i></div></div></div>
+                <div class="pv-dark"><div class="pv-card"><div class="pv-glyph">し</div><div class="pv-bars"><i></i><i></i></div></div></div>
+              </div>
+              <strong>Match system</strong>
+            </button>
+            <button class="theme-opt" role="radio" aria-checked="false" data-theme-value="light">
+              <div class="pv pv-light" aria-hidden="true"><div class="pv-card"><div class="pv-glyph">し</div><div class="pv-bars"><i></i><i></i><i></i><i></i></div></div></div>
+              <strong>Light</strong>
+            </button>
+            <button class="theme-opt" role="radio" aria-checked="false" data-theme-value="dark">
+              <div class="pv pv-dark" aria-hidden="true"><div class="pv-card"><div class="pv-glyph">し</div><div class="pv-bars"><i></i><i></i><i></i><i></i></div></div></div>
+              <strong>Dark</strong>
+            </button>
+          </div>
+        </section>
+
+        <section class="panel" id="panel-data" hidden>
+          <h1>Your data</h1>
+          <p class="lede">Progress stays on this computer. Export it to move to another browser.</p>
+          <div class="data-row">
+            <div><strong>Export progress</strong><span>Saves a JSON file with your answers, streaks and weak items.</span></div>
+            <button class="btn" id="export"><span data-icon="download"></span>Export</button>
+          </div>
+          <div class="data-row">
+            <div><strong>Import progress</strong><span>Replaces your current progress with an exported file.</span></div>
+            <button class="btn" id="import"><span data-icon="upload"></span>Import</button>
+            <input type="file" id="import-file" accept="application/json,.json" hidden />
+          </div>
+          <div class="data-row danger">
+            <div><strong>Reset progress</strong><span>Clears all answers, streaks and stats. Settings stay.</span></div>
+            <button class="btn btn-danger" id="reset"><span data-icon="trash"></span>Reset progress</button>
+          </div>
+          <p class="data-msg" id="data-msg" role="status"></p>
+        </section>
+
+        <section class="panel" id="panel-stats" hidden>
+          <div class="stats-head">
+            <h1>Stats</h1>
+            <button class="btn btn-primary" id="share-open" disabled><span data-icon="share"></span>Share your month</button>
+          </div>
+          <p class="lede">Your streak, how much you've answered, and what needs more practice.</p>
+
+          <div class="stat-grid">
+            <div class="stat">
+              <div class="stat-label"><span data-icon="flame"></span>Current streak</div>
+              <div class="stat-value" id="streak">0 days</div>
+              <div class="stat-sub" id="longest">Longest: 0 days</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label"><span data-icon="target"></span>Today</div>
+              <div class="stat-value" id="today-answered">0 answered</div>
+              <div class="stat-sub" id="today-correct">0 correct</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label"><span data-icon="check"></span>Today's accuracy</div>
+              <div class="stat-value" id="today-acc">—</div>
+              <div class="stat-sub" id="all-time">All time: —</div>
+            </div>
+          </div>
+
+          <div class="block">
+            <div class="block-head"><div><h2>Last 30 days</h2><p>Questions answered each day.</p></div></div>
+            <div class="bars" id="bars" role="img"></div>
+            <div class="axis"><span id="axis-start"></span><span>Today</span></div>
+          </div>
+
+          <div class="block">
+            <div class="block-head"><div><h2>Accuracy by course</h2><p>Share of answers you got right.</p></div></div>
+            <div id="stats-courses"></div>
+          </div>
+
+          <div class="block">
+            <div class="block-head"><div><h2>Weakest items</h2><p>Missed items show up in quizzes more often until you get them right.</p></div></div>
+            <div class="table-wrap" id="stats-weak"></div>
+          </div>
+
+          <dialog class="share-dialog" id="share-dialog" aria-labelledby="share-title">
+            <div class="share-top">
+              <h2 id="share-title">Your month so far</h2>
+              <button class="icon-btn" id="share-close" aria-label="Close"><span data-icon="x"></span></button>
+            </div>
+            <canvas class="share-canvas" id="share-canvas" width="1080" height="1350" role="img"></canvas>
+            <div class="share-actions">
+              <button class="btn btn-primary" id="share-native" hidden><span data-icon="share"></span>Share</button>
+              <button class="btn" id="share-copy"><span data-icon="copy"></span>Copy image</button>
+              <button class="btn" id="share-save"><span data-icon="download"></span>Save image</button>
+            </div>
+            <p class="share-msg" id="share-msg" role="status"></p>
+            <p class="share-note">1080 × 1350, fits Instagram and Facebook feeds without cropping. Follows your light or dark theme.</p>
+          </dialog>
+        </section>
+      </main>
+    </div>
+
+    <script src="data/kana.js"></script>
+    <script src="data/vocab.js"></script>
+    <script src="data/kanji.js"></script>
+    <script src="data/grammar.js"></script>
+    <script src="shared/settings.js"></script>
+    <script src="shared/engine.js"></script>
+    <script src="shared/icons.js"></script>
+    <script src="shared/share-card.js"></script>
+    <script src="options.js"></script>
+    <script src="stats.js"></script>
+  </body>
+</html>

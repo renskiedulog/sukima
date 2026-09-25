@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Sukima modal harness</title>
+    <style>
+      body { font: 16px system-ui; padding: 24px; }
+      /* Hostile page CSS: must not leak into the modal. */
+      div { color: red !important; font-size: 40px; }
+      button { background: hotpink; }
+    </style>
+  </head>
+  <body>
+    <h1>Modal harness (dev only)</h1>
+    <p>Stubs <code>chrome.*</code> so <code>content.js</code> runs outside the extension. Serve the repo root over http and open <code>/tests/harness.html</code>.</p>
+    <p>
+      <button id="show">Show quiz</button>
+      <label><input type="checkbox" id="dark" /> dark theme</label>
+      <input id="page-input" placeholder="page input (focus → suppressed)" />
+    </p>
+    <pre id="log"></pre>
+
+    <script>
+      const log = (...a) => (document.getElementById('log').textContent += a.map((x) => JSON.stringify(x)).join(' ') + '\n');
+      const store = (window.sukimaStore = {}); // exposed so tests can force settings
+      const listeners = [];
+      window.chrome = {
+        runtime: {
+          getURL: (p) => '/' + p,
+          onMessage: { addListener: (fn) => listeners.push(fn) },
+          async sendMessage(msg) {
+            log('→ bg', msg);
+            if (msg.type === 'ANSWERED') {
+              const p = self.SukimaSettings.sanitizeProgress(store.progress);
+              self.SukimaSettings.applyAnswer(p, msg);
+              store.progress = p;
+            }
+            return { ok: true };
+          },
+        },
+        storage: {
+          local: {
+            async get(key) { return { [key]: store[key] }; },
+            async set(obj) { Object.assign(store, JSON.parse(JSON.stringify(obj))); },
+          },
+        },
+      };
+      window.sukimaShow = (force = true) =>
+        new Promise((resolve) => {
+          const done = (r) => { log('← content', r); resolve(r); };
+          for (const fn of listeners) if (fn({ type: 'SHOW_QUIZ', force }, {}, done) !== true) {}
+        });
+      document.getElementById('show').onclick = () => sukimaShow(true);
+      document.getElementById('dark').onchange = (e) => {
+        store.settings = { ...(store.settings || {}), theme: e.target.checked ? 'dark' : 'light' };
+      };
+    </script>
+    <script src="/data/kana.js"></script>
+    <script src="/data/vocab.js"></script>
+    <script src="/data/kanji.js"></script>
+    <script src="/data/grammar.js"></script>
+    <script src="/shared/settings.js"></script>
+    <script src="/shared/engine.js"></script>
+    <script src="/content.js"></script>
+  </body>
+</html>

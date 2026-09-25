@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en" data-theme="system">
+  <head>
+    <meta charset="utf-8" />
+    <title>Sukima</title>
+    <link rel="stylesheet" href="shared/fonts.css" />
+    <link rel="stylesheet" href="shared/theme.css" />
+    <style>
+      body {
+        width: 300px;
+        padding: 14px;
+      }
+
+      .top {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+
+      .logo {
+        display: grid;
+        place-items: center;
+        width: 34px;
+        height: 34px;
+        border-radius: 9px;
+        background: var(--accent);
+        color: var(--accent-fg);
+      }
+
+      .title {
+        font: 400 16px/1.2 var(--font-head);
+      }
+
+      .title small {
+        display: block;
+        font-family: var(--font-ui);
+        font-weight: 500;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .timer {
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--surface);
+        text-align: center;
+        margin-bottom: 10px;
+      }
+
+      .timer-label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .timer-value {
+        font-size: 30px;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -0.01em;
+        margin-top: 2px;
+      }
+
+      .timer.paused .timer-value {
+        color: var(--muted);
+      }
+
+      .actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .actions .wide {
+        grid-column: 1 / -1;
+      }
+
+      .msg {
+        min-height: 18px;
+        margin: 8px 2px 0;
+        font-size: 12px;
+        color: var(--wrong);
+      }
+
+      .links {
+        display: flex;
+        gap: 8px;
+        margin-top: 6px;
+        padding-top: 10px;
+        border-top: 1px solid var(--line);
+      }
+
+      .links .btn {
+        flex: 1;
+        background: transparent;
+        border-color: transparent;
+        color: var(--muted);
+      }
+
+      .links .btn:hover {
+        color: var(--fg);
+        border-color: var(--line);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="top">
+      <div class="logo"><span data-icon="languages" data-size="20"></span></div>
+      <div class="title">Sukima<small lang="ja">隙間時間 · quiz breaks</small></div>
+    </div>
+
+    <div class="timer" id="timer">
+      <div class="timer-label"><span data-icon="clock" data-size="13"></span><span id="timer-label">Next quiz in</span></div>
+      <div class="timer-value" id="timer-value">--:--</div>
+    </div>
+
+    <div class="actions">
+      <button class="btn" id="pause"><span data-icon="pause"></span><span>Pause</span></button>
+      <button class="btn btn-primary" id="quiz-now"><span data-icon="zap"></span><span>Quiz now</span></button>
+      <button class="btn wide" id="block"><span data-icon="ban"></span><span id="block-label">Block this site</span></button>
+    </div>
+    <div class="msg" id="msg" role="status"></div>
+
+    <div class="links">
+      <button class="btn" id="open-settings"><span data-icon="settings"></span>Settings</button>
+      <button class="btn" id="open-stats"><span data-icon="chart"></span>Stats</button>
+    </div>
+
+    <script src="shared/settings.js"></script>
+    <script src="shared/icons.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

@@ -1,0 +1,30 @@
+/* Bundled fonts (SIL Open Font License, see fonts/OFL-*.txt). Subset by tools/subset-fonts.js.
+   The quiz modal loads the same files through the FontFace API in content.js. */
+
+@font-face {
+  font-family: "Sukima Rounded";
+  src: url("../fonts/rounded-500.woff2") format("woff2");
+  font-weight: 100 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Sukima Rounded";
+  src: url("../fonts/rounded-700.woff2") format("woff2");
+  font-weight: 601 750;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Sukima Rounded";
+  src: url("../fonts/rounded-800.woff2") format("woff2");
+  font-weight: 751 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Sukima Pop";
+  src: url("../fonts/pop-400.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
