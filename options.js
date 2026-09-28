@@ -363,6 +363,16 @@
     $("quiet-summary").textContent = text;
   }
 
+  function renderOneShot() {
+    const sw = $("oneshot-switch");
+    sw.setAttribute("aria-checked", String(settings.oneShot));
+    sw.addEventListener("click", () => {
+      const on = sw.getAttribute("aria-checked") !== "true";
+      sw.setAttribute("aria-checked", String(on));
+      change((s) => (s.oneShot = on));
+    });
+  }
+
   function renderQuiet() {
     const qh = settings.quietHours;
     const sw = $("quiet-switch");
@@ -592,6 +602,7 @@
     renderCourses();
     renderStyles();
     renderInterval();
+    renderOneShot();
     renderQuiet();
     renderSites();
     bindSiteForm();

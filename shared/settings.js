@@ -6,6 +6,7 @@
   const DEFAULT_SETTINGS = {
     intervalMin: 15,
     paused: false,
+    oneShot: false,
     theme: 'system',
     blocklist: [],
     quietHours: { enabled: false, days: [1, 2, 3, 4, 5], start: '09:00', end: '17:30' },

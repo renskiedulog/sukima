@@ -169,6 +169,7 @@
       card,
       q: null,
       answered: false,
+      oneShot: settings.oneShot,
       pending: null,
       optionButtons: [],
       prevFocus: deepActiveElement(),
@@ -252,7 +253,7 @@
           class: 'typed',
           onsubmit: (e) => {
             e.preventDefault();
-            if (st.answered) return next();
+            if (st.answered) return st.oneShot ? close() : next();
             if (input.value.trim()) answer(input.value, null);
           },
         },
@@ -266,11 +267,14 @@
     }
 
     const result = h('div', { class: 'result', role: 'status', 'aria-live': 'polite', hidden: true });
-    const nextBtn = h('button', { class: 'btn btn-primary', type: 'button', onclick: next }, 'Next');
+    // One-shot mode: Close takes the Next slot and the popup closes itself after a short look at the result.
+    const nextBtn = st.oneShot
+      ? h('button', { class: 'btn btn-primary', type: 'button', onclick: close }, 'Close')
+      : h('button', { class: 'btn btn-primary', type: 'button', onclick: next }, 'Next');
     const footer = h(
       'div',
       { class: 'foot', hidden: true },
-      h('button', { class: 'btn', type: 'button', onclick: close }, 'Close'),
+      st.oneShot ? '' : h('button', { class: 'btn', type: 'button', onclick: close }, 'Close'),
       nextBtn
     );
 
@@ -368,9 +372,7 @@
       h('div', { class: 'verdict' }, perfect ? 'All matched' : `${total - m.missed.size} of ${total} right on the first try`),
       q.note ? h('div', { class: 'note', lang: 'ja' }, q.note) : ''
     );
-    st.result.hidden = false;
-    st.footer.hidden = false;
-    st.nextBtn.focus({ preventScroll: true });
+    showResult(perfect);
     // Each item gets its own result: missed once = counts as a miss.
     st.pending = Promise.all(
       q.pairs.map((p, i) => send({ type: 'ANSWERED', itemId: p.itemId, correct: !m.missed.has(i), courseId: q.courseId }))
@@ -401,11 +403,23 @@
       h('div', { class: 'verdict' }, correct ? 'Correct' : h('span', {}, 'Answer: ', h('strong', { lang: 'ja' }, q.reveal))),
       q.note ? h('div', { class: 'note', lang: 'ja' }, q.note) : ''
     );
+    showResult(correct);
+
+    st.pending = send({ type: 'ANSWERED', itemId: q.itemId, correct, courseId: q.courseId });
+  }
+
+  // Long enough to read the correct answer when wrong; quick when right.
+  const ONE_SHOT_CLOSE_MS = { right: 1500, wrong: 3500 };
+
+  function showResult(correct) {
     st.result.hidden = false;
     st.footer.hidden = false;
     st.nextBtn.focus({ preventScroll: true });
-
-    st.pending = send({ type: 'ANSWERED', itemId: q.itemId, correct, courseId: q.courseId });
+    if (!st.oneShot) return;
+    const mine = st;
+    setTimeout(() => {
+      if (st === mine) close();
+    }, correct ? ONE_SHOT_CLOSE_MS.right : ONE_SHOT_CLOSE_MS.wrong);
   }
 
   async function next() {
@@ -502,7 +516,8 @@
 
     if (e.key === 'Enter' && st.answered && !(active && active.tagName === 'BUTTON')) {
       e.preventDefault();
-      next();
+      if (st.oneShot) close();
+      else next();
     }
   }
 
