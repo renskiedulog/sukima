@@ -51,7 +51,16 @@
       desc: "Spot the item that doesn't share a kana row or topic.",
     },
   };
-  const INTERVAL_PRESETS = [5, 10, 15, 30, 60];
+  const STYLE_ICONS = {
+    mc: "choices",
+    type: "text-cursor",
+    kana: "languages",
+    fill: "blank",
+    match: "pairs",
+    tf: "true-false",
+    odd: "odd",
+  };
+  const INTERVAL_PRESETS =[5, 10, 15, 30, 60];
   const DAYS = [
     [1, "Mon"],
     [2, "Tue"],
@@ -285,7 +294,11 @@
         el(
           "div",
           { class: "row" },
-          el("div", {}, el("strong", {}, copy.name), el("span", {}, copy.desc)),
+          el("span", {
+            class: "row-icon",
+            html: I.svg(STYLE_ICONS[type.id] || "zap", 20),
+          }),
+          el("div", {},el("strong", {}, copy.name), el("span", {}, copy.desc)),
           switchButton(copy.name, settings.types[type.id], (on) =>
             change((s) => (s.types[type.id] = on)),
           ),
